@@ -24,6 +24,7 @@ class GoogleReviewBot:
         options = uc.ChromeOptions()
         options.add_argument("--start-maximized")
         self.driver = uc.Chrome(options=options, version_main=153)
+        self.driver.maximize_window()
         self.initialize()
 
     def initialize(self):
@@ -90,45 +91,31 @@ class GoogleReviewBot:
             sleep(random.choice(self.waitDuration))
             
         except Exception as exc:
-            print("There is a problem 1 during login.")
-            print(f"Login detail: {exc}")
+            print(f"Login issue for {self.mailaddress}: {exc}")
             raise exc
 
     def _comment(self):
         try:
             self.i += 1
             self.driver.get(self.urls[self.i])
-            sleep(5)
+            sleep(6)
 
-            # Step 1: Open the review modal
-            review_button = WebDriverWait(self.driver, 20).until(
-                EC.element_to_be_clickable((By.XPATH, "//button[contains(@aria-label, 'Write a review') or contains(@aria-label, 'Rate this place')]"))
+            # Step 1: Open the review modal using robust multi-fallback locators
+            review_button = self._find_any(
+                self.driver,
+                [
+                    (By.XPATH, "//button[contains(@aria-label, 'Write a review')]"),
+                    (By.XPATH, "//button[contains(@aria-label, 'Rate this place')]"),
+                    (By.XPATH, "//button[.//*[contains(translate(normalize-space(.),'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'write a review')]]"),
+                    (By.CSS_SELECTOR, "button.F7nice"),
+                ],
+                timeout=25,
             )
             self._hardware_click(review_button)
             sleep(3)
 
-            # Step 2: Inject your exact comment text safely via DOM/JS
-            target_comment = "Good overall experience with clear communication and efficient support. Everything was reasonably well organized, and the team made the process easy to understand and complete."
-            
-            self.driver.execute_script("""
-                let commentText = arguments[0];
-                let ta = document.querySelector('textarea');
-                if (ta) {
-                    ta.focus();
-                    let nativeSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-                    if (nativeSetter) {
-                        nativeSetter.call(ta, commentText);
-                    } else {
-                        ta.value = commentText;
-                    }
-                    ta.dispatchEvent(new Event('input', { bubbles: true }));
-                    ta.dispatchEvent(new Event('change', { bubbles: true }));
-                }
-            """, target_comment)
-            sleep(1.5)
-
-            # Step 3: Trigger your custom coordinate visual agent for the star and post button
-            success = post_review_visually()
+            # Step 2: Pass the CSV comment string to the visual poster module
+            success = post_review_visually(self.comment)
             if not success:
                 print("Warning: Visual poster encountered an issue.")
             
@@ -139,8 +126,7 @@ class GoogleReviewBot:
                 completedAccounts.write(self.mailaddress + "-" + self.password + "\n")
                 
         except Exception as exc:
-            print("There is a problem in Comment.")
-            print(f"Comment detail: {exc}")
+            print(f"Problem during commenting for {self.mailaddress}: {exc}")
         finally:
             if self.driver:
                 try:
@@ -187,12 +173,18 @@ if __name__ == "__main__":
     commentsFile = base_dir / "data" / "comments.csv"
 
     UserInfoDF = GoogleReviewBot.GetUserInfo(str(mailaddressFile), str(passwordsFile), str(commentsFile))
+    
     for num in range(len(UserInfoDF)):
         UserInfoSeries = UserInfoDF.loc[num]
+        print(f"\n--- Processing account {num + 1} of {len(UserInfoDF)}: {UserInfoSeries['mailaddress']} ---")
         try:
-            GRB = GoogleReviewBot(UserInfoSeries["mailaddress"], UserInfoSeries["password"], UserInfoSeries["comment"])
+            GRB = GoogleReviewBot(
+                UserInfoSeries["mailaddress"], 
+                UserInfoSeries["password"], 
+                UserInfoSeries["comment"]
+            )
             GRB._login()
             GRB._comment()
         except Exception as exc:
-            print(f"There is a problem during account processing: {exc}")
-            pass
+            print(f"Skipping account due to error: {exc}")
+            continue
