@@ -1,37 +1,71 @@
-# GoogleReviewBot ![License](https://img.shields.io/badge/License-MIT-red.svg)
-## Automatically Google review  with 5 star rating.
+# Google Map Review Bot ![License](https://img.shields.io/badge/License-MIT-red.svg)
 
+An advanced, multi-account Python automation pipeline designed to programmatically submit customized Google Maps reviews. This project uses a hybrid architecture combining stealth browser automation with OS-level visual emulation to successfully bypass modern browser security layers, DOM restrictions, and React's `isTrusted` bot-detection mechanisms.
 
+---
 
-### setup:
-- `git clone https://github.com/mert-donmez/GoogleReviewBot`
+## Key Features
 
-- `python3 -m pip install -r requirements.txt`
+* **Hybrid Automation Engine:** Integrates `undetected-chromedriver` and Chrome DevTools Protocol (CDP) for secure login management, paired with **PyAutoGUI** for robust OS-level visual mouse and keyboard interactions.
+* **`isTrusted` Bypass:** Overcomes React's synthetic event blocking by dispatching true hardware-level interrupts at the operating system kernel level.
+* **Sequential Multi-Account Pipeline:** Handles end-to-end session lifecycles—signing in, navigating, reviewing, and cleanly closing sessions sequentially across multiple accounts.
+* **Dynamic CSV Integration:** Automatically pulls credentials and customized review comments from structured datasets (`mailaddresses.csv`, `passwords.csv`, `comments.csv`).
+* **Visual Coordinate Mapping:** Employs precise screen resolution scaling and coordinate-based clicking to seamlessly interact with dynamic modals where traditional DOM element selection fails.
 
-### Usage:
-- Enter the URL link of the place to be rating in GoogleReviewBot.py file
-- Enter the email, password and comment lists into the files in the data folder
-- -Note: Number of emails,passwords and comments must be the same 
-- Use IP switcher with this bot: [IP_Switcher](https://github.com/mert-donmez/IP_Degistirici)
-- Then run the bot `python3 GoogleReviewBot.py`
+---
 
+## Project Structure
 
+```text
+bot-main/
+│
+├── data/
+│   ├── comments.csv
+│   ├── completedAccounts.csv
+│   ├── mailaddresses.csv
+│   └── passwords.csv
+│
+├── GoogleReviewBot.py
+├── visual_poster.py
+├── LICENSE
+├── README.md
+└── requirements.txt
 
-### The URL link of the place to be rating should be as follows:
+Setup & Installation
+Clone the Repository:
 
-- 1-click the link: 
-[example: Empire State Building](https://www.google.com/search?q=empire+state+building&biw=1920&bih=841&tbm=lcl&sxsrf=AOaemvKtJq3ct8p65NL3BUMpvXtXXWJ2Ww%3A1641592752932&ei=sLfYYZmvONiRxc8PwLqiiA8&oq=empire+state&gs_l=psy-ab.1.1.35i39k1j0i433i67k1j0i512k1l7j0i67k1.63774.65241.0.67175.12.10.0.0.0.0.384.1764.0j1j5j1.7.0....0...1c.1.64.psy-ab..5.7.1764...0i512i433k1j0i512i433i131k1j0i512i457k1.0.-OO0zl_w5LU#rlfi=hd:;si:15074921902713971043,l,ChVlbXBpcmUgc3RhdGUgYnVpbGRpbmdIn6MFWicQAhgAGAEYAiIVZW1waXJlIHN0YXRlIGJ1aWxkaW5nKgIIAjICZW6SARJ0b3VyaXN0X2F0dHJhY3Rpb24,y,IYrXyp60Thk;mv:[[40.74862047731903,-73.98542683213199],[40.74826052268097,-73.98590196786799]])
+Bash
+git clone [https://github.com/keshav-rao/Google_Map_Review_Bot.git](https://github.com/keshav-rao/Google_Map_Review_Bot.git)
+cd Google_Map_Review_Bot
+Install Dependencies:
+Ensure you have Python installed, then install the required automation libraries:
 
-- 2-Search and find your place
+Bash
+pip install -r requirements.txt
+(Required packages: undetected-chromedriver, pandas, pyautogui)
 
-- 3-Scroll down and click "add comment" button
+Configure Your Data Files:
+Navigate into the data/ folder and populate your records:
 
-- 4-it has to be like this then take link and add link in GoogleReviewBot.py file
-![Screenshot from 2022-01-08 00-31-45](https://user-images.githubusercontent.com/83416622/148614341-f61c874c-92a1-425b-89d4-57059b035b43.png)
+mailaddresses.csv: List of Google account emails (one per line).
 
-- You can change sleep duration according to your internet speed
-- if there is a problem with the running of the program, the sleep times are short
+passwords.csv: Corresponding account passwords (one per line).
 
+comments.csv: Customized review comments (one per line).
 
+Note: The total number of rows across all three CSV files must match.
 
-# bot
+Set Your Target URL:
+Open GoogleReviewBot.py and update the PlaceURL variable with the Google Maps link of the location you wish to review.
+
+Usage
+Ensure your monitor is set to a maximized or full-screen window environment so the visual agent coordinates align accurately.
+
+Run the automation pipeline from your terminal:
+
+Bash
+python GoogleReviewBot.py
+Important Note: While the visual agent (pyautogui) is actively executing clicks and typing reviews, avoid moving your physical mouse or typing on your keyboard to ensure smooth execution.
+
+License
+Distributed under the MIT License. See LICENSE for more information.
